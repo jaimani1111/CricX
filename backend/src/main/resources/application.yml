@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: crickx-backend
+
+  data:
+    mongodb:
+      # Use defaults or random port if needed
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 6.0.6
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:crickx-super-secret-key-that-should-be-changed-in-production-2024-min-256-bits}
+  expiration: ${JWT_EXPIRATION:86400000}  # 24 hours in milliseconds
+
+# Resend Email Integration
+resend:
+  api:
+    key: ${RESEND_API_KEY:re_Aq77GFFW_3M2kmcmeY37NoKPNJSvkMZEM}
+
+# CORS
+cors:
+  allowed-origins: ${CORS_ORIGINS:http://localhost:4200,http://localhost}
+
+# Logging
+logging:
+  level:
+    com.crickx: DEBUG
+    org.springframework.data.mongodb: DEBUG

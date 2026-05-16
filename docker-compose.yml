@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: crickx-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crickx-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - MONGODB_URI=mongodb://mongodb:27017/crickx
+      - JWT_SECRET=production-ready-super-secret-key-that-should-be-in-env-vars-2024
+      - CORS_ORIGINS=http://localhost:4200,http://localhost
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crickx-frontend
+    ports:
+      - "80:80"
+      - "4200:80" # Mapping 4200 for easier local feeling
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
