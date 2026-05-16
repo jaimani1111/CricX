@@ -34,7 +34,7 @@ public class Tournament {
     private String sport;
     private String locationName;
 
-    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO2DSPHERE)
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint location;
     
     private Instant dateTime;
