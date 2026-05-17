@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, RouterLink } from '@angular/router';
 import { BottomNavComponent } from './shared/components/bottom-nav/bottom-nav.component';
 import { AuthService } from './core/auth/auth.service';
+import { EsportsService } from './core/services/esports.service';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,14 @@ import { AuthService } from './core/auth/auth.service';
           <div class="logo-box-m">P<span>b</span></div>
           <span class="logo-text-m">Playb</span>
         </div>
+
+        <!-- Mobile Compact Mode Switcher -->
+        <div class="compact-mode-switch" (click)="toggleMode()">
+          <div class="compact-slider" [class.esports-active]="activeMode() === 'esports'"></div>
+          <span class="compact-label" [class.active]="activeMode() === 'sports'">S</span>
+          <span class="compact-label" [class.active]="activeMode() === 'esports'">E</span>
+        </div>
+
         <div class="header-actions">
           <a routerLink="/profile" class="profile-avatar-m" *ngIf="currentUser()">
             <img *ngIf="currentUser()?.profilePicture" [src]="currentUser()?.profilePicture" alt="Profile" />
@@ -91,6 +100,46 @@ import { AuthService } from './core/auth/auth.service';
       color: white;
     }
 
+    /* COMPACT MOBILE SWITCH */
+    .compact-mode-switch {
+      display: flex;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 2px;
+      position: relative;
+      cursor: pointer;
+      width: 80px;
+      user-select: none;
+    }
+    .compact-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      bottom: 2px;
+      width: calc(50% - 2px);
+      background: var(--gradient-primary);
+      border-radius: 18px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-glow);
+    }
+    .compact-slider.esports-active {
+      transform: translateX(100%);
+    }
+    .compact-label {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.4);
+      padding: 4px 0;
+      z-index: 2;
+      transition: color 0.3s;
+    }
+    .compact-label.active {
+      color: #0F172A !important;
+    }
+
     .profile-avatar-m {
       width: 36px;
       height: 36px;
@@ -138,9 +187,16 @@ import { AuthService } from './core/auth/auth.service';
 export class AppComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private esportsService = inject(EsportsService);
 
   showNav = computed(() => this.authService.isLoggedIn());
   currentUser = this.authService.currentUser;
+
+  activeMode = this.esportsService.activeMode;
+
+  toggleMode() {
+    this.esportsService.toggleMode();
+  }
 
   goToDashboard() {
     const role = this.currentUser()?.role;

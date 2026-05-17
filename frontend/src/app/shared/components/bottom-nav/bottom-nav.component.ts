@@ -3,13 +3,14 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/auth/auth.service';
+import { EsportsService } from '../../../core/services/esports.service';
 
 @Component({
   selector: 'app-bottom-nav',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, MatIconModule],
   template: `
-    <nav class="nav-container">
+    <nav class="nav-container" [class.esports-active-nav]="activeMode() === 'esports'">
       <div class="nav-bg"></div>
       
       <!-- Brand Logo (Sidebar only) -->
@@ -18,10 +19,53 @@ import { AuthService } from '../../../core/auth/auth.service';
         <span class="logo-text">Playb</span>
       </div>
 
+      <!-- Mode Switcher (Sidebar only) -->
+      <div class="mode-switch-container">
+        <div class="mode-switch" (click)="toggleMode()">
+          <div class="mode-slider" [class.esports-active]="activeMode() === 'esports'"></div>
+          <span class="mode-label" [class.active]="activeMode() === 'sports'">Sports</span>
+          <span class="mode-label" [class.active]="activeMode() === 'esports'">Esports</span>
+        </div>
+      </div>
+
       <!-- Nav Items -->
       <div class="items-wrapper">
-        <!-- PLAYER NAV -->
-        <ng-container *ngIf="!isAdmin()">
+        <!-- ESPORTS NAVIGATION (Shown when activeMode is esports) -->
+        <ng-container *ngIf="activeMode() === 'esports'">
+          <a routerLink="/esports/arena" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">explore</mat-icon>
+            <span class="label">Arena</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/esports/challenges" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">emoji_events</mat-icon>
+            <span class="label">Challenges</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/esports/tournaments" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">military_tech</mat-icon>
+            <span class="label">Tourneys</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/esports/squads" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">groups</mat-icon>
+            <span class="label">Squads</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/esports/chat" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">chat</mat-icon>
+            <span class="label">Chat</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/esports/profile" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">person</mat-icon>
+            <span class="label">Profile</span>
+            <div class="active-indicator"></div>
+          </a>
+        </ng-container>
+
+        <!-- STANDARD SPORTS PLAYER NAV -->
+        <ng-container *ngIf="activeMode() === 'sports' && !isAdmin()">
           <a routerLink="/matches" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
             <mat-icon class="m-icon">explore</mat-icon>
             <span class="label">Browse</span>
@@ -54,8 +98,8 @@ import { AuthService } from '../../../core/auth/auth.service';
           </a>
         </ng-container>
 
-        <!-- ADMIN NAV -->
-        <ng-container *ngIf="isAdmin() && !isSuperAdmin()">
+        <!-- STANDARD SPORTS ADMIN NAV -->
+        <ng-container *ngIf="activeMode() === 'sports' && isAdmin() && !isSuperAdmin()">
           <a routerLink="/admin/turf" [queryParams]="{tab: 'dashboard'}" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
             <mat-icon class="m-icon">dashboard</mat-icon>
             <span class="label">Dashboard</span>
@@ -88,8 +132,8 @@ import { AuthService } from '../../../core/auth/auth.service';
           </a>
         </ng-container>
 
-        <!-- SUPER ADMIN NAV -->
-        <ng-container *ngIf="isSuperAdmin()">
+        <!-- STANDARD SPORTS SUPER ADMIN NAV -->
+        <ng-container *ngIf="activeMode() === 'sports' && isSuperAdmin()">
           <a routerLink="/matches" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
             <mat-icon class="m-icon">explore</mat-icon>
             <span class="label">Browse</span>
@@ -122,16 +166,16 @@ import { AuthService } from '../../../core/auth/auth.service';
           </a>
         </ng-container>
 
-        <!-- Profile (shared for non-admin) -->
-        <a *ngIf="!isAdmin()" routerLink="/profile" routerLinkActive="active" class="nav-item">
+        <!-- Profile (shared for non-admin in sports mode) -->
+        <a *ngIf="activeMode() === 'sports' && !isAdmin()" routerLink="/profile" routerLinkActive="active" class="nav-item">
           <mat-icon class="m-icon">person</mat-icon>
           <span class="label">Profile</span>
           <div class="active-indicator"></div>
         </a>
       </div>
 
-      <!-- Admin Links (Sidebar only) -->
-      <div class="admin-links" *ngIf="isSuperAdmin()">
+      <!-- Admin Links (Sidebar only, sports mode only) -->
+      <div class="admin-links" *ngIf="activeMode() === 'sports' && isSuperAdmin()">
         <div class="section-label">Admin</div>
         <a routerLink="/admin/super" routerLinkActive="active" class="nav-item">
           <mat-icon class="m-icon">shield</mat-icon>
@@ -286,14 +330,73 @@ import { AuthService } from '../../../core/auth/auth.service';
       }
       .logout-btn:hover { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.15); }
       .logout-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+      /* SIDEBAR MODE SWITCHER STYLE */
+      .mode-switch-container {
+        display: flex;
+        width: 100%;
+        padding: 0 16px;
+        margin-bottom: 24px;
+        justify-content: center;
+      }
+      .mode-switch {
+        display: flex;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 30px;
+        padding: 4px;
+        position: relative;
+        cursor: pointer;
+        width: 100%;
+        user-select: none;
+      }
+      .mode-slider {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        bottom: 4px;
+        width: calc(50% - 4px);
+        background: var(--gradient-primary);
+        border-radius: 25px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--shadow-glow);
+      }
+      .mode-slider.esports-active {
+        transform: translateX(100%);
+      }
+      .mode-label {
+        flex: 1;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: rgba(255,255,255,0.4);
+        padding: 6px 0;
+        z-index: 2;
+        transition: color 0.3s;
+      }
+      .mode-label.active {
+        color: #0F172A !important;
+      }
+
+      /* Cyber cyberpunk active item background override */
+      .nav-container.esports-active-nav .nav-item.active {
+        background: rgba(6, 182, 212, 0.08) !important;
+      }
     }
   `]
 })
 export class BottomNavComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private esportsService = inject(EsportsService);
 
   private user = this.authService.currentUser;
+  
+  activeMode = this.esportsService.activeMode;
+
+  toggleMode() {
+    this.esportsService.toggleMode();
+  }
 
   isAdmin(): boolean {
     const role = this.user()?.role;

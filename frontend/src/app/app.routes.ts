@@ -66,6 +66,19 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/messages/messages.component').then(m => m.MessagesComponent)
   },
   {
+    path: 'esports',
+    canActivate: [authGuard],
+    children: [
+      { path: '', redirectTo: 'arena', pathMatch: 'full' },
+      { path: 'arena', loadComponent: () => import('./pages/esports/arena/esports-arena.component').then(m => m.EsportsArenaComponent) },
+      { path: 'challenges', loadComponent: () => import('./pages/esports/challenges/esports-challenges.component').then(m => m.EsportsChallengesComponent) },
+      { path: 'tournaments', loadComponent: () => import('./pages/esports/tournaments/esports-tournaments.component').then(m => m.EsportsTournamentsComponent) },
+      { path: 'squads', loadComponent: () => import('./pages/esports/squads/esports-squads.component').then(m => m.EsportsSquadsComponent) },
+      { path: 'chat', loadComponent: () => import('./pages/esports/chat/esports-chat.component').then(m => m.EsportsChatComponent) },
+      { path: 'profile', loadComponent: () => import('./pages/esports/profile/esports-profile.component').then(m => m.EsportsProfileComponent) }
+    ]
+  },
+  {
     path: 'admin',
     canActivate: [authGuard],
     children: [
