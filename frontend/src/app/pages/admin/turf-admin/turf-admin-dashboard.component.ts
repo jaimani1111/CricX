@@ -8,7 +8,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { AdminService } from '../../../core/services/admin.service';
 import { Turf, BlockedSlot } from '../../../core/models/turf.model';
 import { LocationService } from '../../../core/services/location.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-turf-admin-dashboard',
@@ -19,10 +19,10 @@ import { Router } from '@angular/router';
       <div class="glass-header">
         <div class="header-content">
           <span class="badge">Partner Console</span>
-          <h1>{{ activeTab === 'my-venues' ? 'Venue Analytics' : activeTab === 'register' ? 'List Your Venue' : 'Event Organiser' }}</h1>
+          <h1>{{ activeTab === 'dashboard' ? 'Partner Overview' : activeTab === 'my-venues' ? 'Venue Analytics' : activeTab === 'register' ? 'List Your Venue' : 'Event Organiser' }}</h1>
           <p>{{ getTabSubtext() }}</p>
         </div>
-        <div class="quick-stats" *ngIf="activeTab === 'my-venues'">
+        <div class="quick-stats" *ngIf="activeTab === 'dashboard' || activeTab === 'my-venues'">
           <div class="q-stat glass-card">
             <span class="q-val">{{ myTurfs.length }}</span>
             <span class="q-lab">Active Venues</span>
@@ -30,20 +30,115 @@ import { Router } from '@angular/router';
         </div>
       </div>
 
-      <div class="tab-nav">
-        <button [class.active]="activeTab === 'my-venues'" (click)="activeTab = 'my-venues'">
-          <mat-icon>dashboard</mat-icon> My Venues
-        </button>
-        <button [class.active]="activeTab === 'register'" (click)="activeTab = 'register'">
-          <mat-icon>add_business</mat-icon> Register Venue
-        </button>
-        <button [class.active]="activeTab === 'events'" (click)="activeTab = 'events'">
-          <mat-icon>event</mat-icon> Host Events
-        </button>
-      </div>
-
       <div class="dashboard-content animate-fade-in-up">
         
+        <!-- SECTION: DASHBOARD OVERVIEW -->
+        <div *ngIf="activeTab === 'dashboard'" class="admin-dashboard-overview">
+          <!-- TOP ANALYTICS BADGES -->
+          <div class="analytics-grid">
+            <div class="metric-card glass-card">
+              <div class="card-icon"><mat-icon>payments</mat-icon></div>
+              <div class="card-stats">
+                <span class="m-val">₹{{ totalRevenue | number }}</span>
+                <span class="m-lbl">Total Amount Collected</span>
+              </div>
+            </div>
+
+            <div class="metric-card glass-card">
+              <div class="card-icon"><mat-icon>stadium</mat-icon></div>
+              <div class="card-stats">
+                <span class="m-val">{{ myTurfs.length }}</span>
+                <span class="m-lbl">Active Venues</span>
+              </div>
+            </div>
+
+            <div class="metric-card glass-card">
+              <div class="card-icon"><mat-icon>event_busy</mat-icon></div>
+              <div class="card-stats">
+                <span class="m-val">{{ totalSlotBookingsCount }}</span>
+                <span class="m-lbl">Slot Reservations</span>
+              </div>
+            </div>
+
+            <div class="metric-card glass-card">
+              <div class="card-icon"><mat-icon>military_tech</mat-icon></div>
+              <div class="card-stats">
+                <span class="m-val">{{ totalEventRegistrationsCount }}</span>
+                <span class="m-lbl">Tournament Sign-ups</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECENT ACTIVITY PANELS -->
+          <div class="dashboard-panels-grid mt-4">
+            <!-- PANEL: SLOT RESERVATIONS -->
+            <div class="panel-card glass-card">
+              <div class="panel-header">
+                <h3><mat-icon>menu_book</mat-icon> Recent Turf Bookings</h3>
+                <button class="panel-action-btn" (click)="goToTab('my-venues')">Manage Slots</button>
+              </div>
+              <div class="panel-content">
+                <div class="table-container" *ngIf="allBookingsList.length > 0; else noDashBookings" style="overflow-x: auto;">
+                  <table class="bookings-table-admin">
+                    <thead>
+                      <tr>
+                        <th>Venue</th>
+                        <th>Date & Time</th>
+                        <th>Player</th>
+                        <th>Phone</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let b of allBookingsList | slice:0:5">
+                        <td><strong>{{ b.turfName }}</strong></td>
+                        <td><span class="booking-date-badge">{{ b.date }}</span> <span class="booking-time-badge ml-1">{{ b.startTime }}</span></td>
+                        <td>{{ b.bookedByUserName }}</td>
+                        <td>{{ b.bookedByUserPhone }}</td>
+                        <td><span class="collected-amt">₹{{ b.price }}</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <ng-template #noDashBookings>
+                  <div class="no-bookings-placeholder">
+                    <mat-icon>event_busy</mat-icon>
+                    <p>No slot bookings yet. Promote your turfs to players!</p>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- PANEL: HOSTED TOURNAMENTS -->
+            <div class="panel-card glass-card">
+              <div class="panel-header">
+                <h3><mat-icon>military_tech</mat-icon> Upcoming Tournaments & Matches</h3>
+                <button class="panel-action-btn" (click)="goToTab('events')">Host Event</button>
+              </div>
+              <div class="panel-content">
+                <div class="events-list-dashboard" *ngIf="myEvents.length > 0; else noDashEvents">
+                  <div class="dashboard-event-item" *ngFor="let ev of myEvents | slice:0:4">
+                    <div class="ev-dash-meta">
+                      <h4>{{ ev.title }}</h4>
+                      <span class="ev-dash-date">{{ ev.dateTime | date:'mediumDate' }} • {{ ev.category }}</span>
+                    </div>
+                    <div class="ev-dash-revenue">
+                      <span class="tickets-pill">{{ ev.registeredUserIds?.length || 0 }} joined</span>
+                      <span class="amt-earned">₹{{ (ev.registeredUserIds?.length || 0) * (ev.ticketPrice || 0) }}</span>
+                    </div>
+                  </div>
+                </div>
+                <ng-template #noDashEvents>
+                  <div class="no-bookings-placeholder">
+                    <mat-icon>military_tech</mat-icon>
+                    <p>No active events hosted yet.</p>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- SECTION: MY VENUES -->
         <div *ngIf="activeTab === 'my-venues'">
           <div class="venue-list" *ngIf="myTurfs.length > 0; else noTurfs">
@@ -704,6 +799,32 @@ import { Router } from '@angular/router';
     .mt-3 { margin-top: 24px; }
     .mb-4 { margin-bottom: 32px; }
 
+    /* REVAMPED ADMIN DASHBOARD OVERVIEW */
+    .admin-dashboard-overview { display: flex; flex-direction: column; gap: 24px; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .metric-card { display: flex; align-items: center; gap: 20px; padding: 24px !important; }
+    .metric-card .card-icon { width: 56px; height: 56px; border-radius: 16px; background: rgba(74, 222, 128, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; }
+    .metric-card .card-icon mat-icon { font-size: 28px; width: 28px; height: 28px; }
+    .metric-card .card-stats { display: flex; flex-direction: column; }
+    .metric-card .m-val { font-size: 28px; font-weight: 800; color: white; line-height: 1.1; }
+    .metric-card .m-lbl { font-size: 12px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 4px; font-weight: 700; letter-spacing: 0.5px; }
+    
+    .dashboard-panels-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; }
+    .panel-card { display: flex; flex-direction: column; gap: 20px; padding: 24px !important; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; }
+    .panel-header h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: white; }
+    .panel-action-btn { background: rgba(74, 222, 128, 0.1); color: var(--primary); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .panel-action-btn:hover { background: var(--primary); color: #0F172A; }
+    
+    .collected-amt { font-weight: 800; color: var(--primary); }
+    .events-list-dashboard { display: flex; flex-direction: column; gap: 12px; }
+    .dashboard-event-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; }
+    .ev-dash-meta h4 { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+    .ev-dash-date { font-size: 11px; color: rgba(255,255,255,0.4); }
+    .ev-dash-revenue { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .tickets-pill { font-size: 10px; background: rgba(74, 222, 128, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 100px; font-weight: 700; }
+    .amt-earned { font-size: 14px; font-weight: 800; color: #F59E0B; }
+
     @media (max-width: 1023px) {
       .glass-header { padding: 40px 20px 20px !important; flex-direction: column; align-items: flex-start; gap: 16px; }
       .tab-nav { padding: 0 20px !important; gap: 10px !important; overflow-x: auto; }
@@ -716,11 +837,15 @@ import { Router } from '@angular/router';
       .toggle-grid { grid-template-columns: repeat(2, 1fr) !important; }
       .price-editor-row { flex-direction: column; gap: 10px; }
       .update-btn { height: 48px; }
+      .form-row { grid-template-columns: 1fr !important; gap: 12px !important; margin-bottom: 12px !important; }
+      
+      .analytics-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+      .dashboard-panels-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
     }
   `]
 })
 export class TurfAdminDashboardComponent implements OnInit {
-  activeTab: 'my-venues' | 'register' | 'events' = 'my-venues';
+  activeTab: 'dashboard' | 'my-venues' | 'register' | 'events' = 'dashboard';
   regStep = 1;
   isLoading = false;
   
@@ -747,12 +872,63 @@ export class TurfAdminDashboardComponent implements OnInit {
   allSportsList = ['Cricket', 'Football', 'Tennis', 'Basketball', 'Badminton', 'Pickleball'];
   allFacilitiesList = ['Floodlights', 'Parking', 'Washroom', 'Changing Room', 'Cafeteria', 'Water', 'Medical Kit'];
 
+  // Admin Dashboard Dynamic Analytics
+  get totalRevenue(): number {
+    let rev = 0;
+    for (const turf of this.myTurfs) {
+      const bookingsCount = (turf.manuallyBlockedSlots || []).filter(s => s.bookedByUserId || s.reason === 'Playb App Booking').length;
+      rev += bookingsCount * turf.basePricePerHour;
+    }
+    for (const ev of this.myEvents) {
+      const ticketsSold = ev.registeredUserIds?.length || 0;
+      rev += ticketsSold * (ev.ticketPrice || 0);
+    }
+    return rev;
+  }
+
+  get totalSlotBookingsCount(): number {
+    let count = 0;
+    for (const turf of this.myTurfs) {
+      count += (turf.manuallyBlockedSlots || []).filter(s => s.bookedByUserId || s.reason === 'Playb App Booking').length;
+    }
+    return count;
+  }
+
+  get totalEventRegistrationsCount(): number {
+    let count = 0;
+    for (const ev of this.myEvents) {
+      count += ev.registeredUserIds?.length || 0;
+    }
+    return count;
+  }
+
+  get allBookingsList(): { turfName: string; date: string; startTime: string; endTime: string; bookedByUserName: string; bookedByUserPhone: string; price: number }[] {
+    const list: any[] = [];
+    for (const turf of this.myTurfs) {
+      for (const slot of (turf.manuallyBlockedSlots || [])) {
+        if (slot.bookedByUserId || slot.reason === 'Playb App Booking') {
+          list.push({
+            turfName: turf.name,
+            date: slot.date,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            bookedByUserName: slot.bookedByUserName || 'Registered Player',
+            bookedByUserPhone: slot.bookedByUserPhone || 'N/A',
+            price: turf.basePricePerHour
+          });
+        }
+      }
+    }
+    return list.sort((a, b) => b.date.localeCompare(a.date));
+  }
+
   constructor(
     private fb: FormBuilder,
     private adminService: AdminService,
     private locationService: LocationService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.turfForm = this.fb.group({
       name: ['', Validators.required],
@@ -814,14 +990,29 @@ export class TurfAdminDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadMyTurfs();
     this.loadMyEvents();
+
+    this.route.queryParams.subscribe(params => {
+      const tab = params['tab'];
+      if (tab && ['dashboard', 'my-venues', 'register', 'events'].includes(tab)) {
+        this.activeTab = tab as any;
+      } else {
+        this.activeTab = 'dashboard';
+      }
+    });
   }
 
   getTabSubtext() {
     switch(this.activeTab) {
+      case 'dashboard': return 'Partner console overview, earnings, and statistics';
       case 'my-venues': return 'Manage your premium turfs & availability';
       case 'register': return 'Join the elite Playb venue network';
       case 'events': return 'Organise professional matches and stadium events';
+      default: return 'Partner Console';
     }
+  }
+
+  goToTab(tab: 'dashboard' | 'my-venues' | 'register' | 'events') {
+    this.router.navigate(['/admin/turf'], { queryParams: { tab } });
   }
 
   loadMyTurfs() {
@@ -986,7 +1177,7 @@ export class TurfAdminDashboardComponent implements OnInit {
   }
 
   getPlayerBookings(turf: Turf): any[] {
-    return (turf.manuallyBlockedSlots || []).filter(slot => slot.bookedByUserId != null);
+    return (turf.manuallyBlockedSlots || []).filter(slot => slot.bookedByUserId != null || slot.reason === 'Playb App Booking');
   }
 
   messagePlayerFromBooking(booking: any) {

@@ -203,10 +203,15 @@ export class SignupComponent {
     if (this.signupForm.valid) {
       this.isLoading = true;
       this.authService.signup(this.signupForm.value).subscribe({
-        next: () => {
+        next: (res) => {
           this.snackBar.open('Account created successfully! 🎉', 'Close', { duration: 3000 });
-          // In DEV MODE the backend auto-verifies and logs in, so we go directly to app
-          this.router.navigate(['/matches']);
+          // Check role and navigate accordingly
+          const role = this.authService.currentUser()?.role;
+          if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+            this.router.navigate(['/admin/turf'], { queryParams: { tab: 'dashboard' } });
+          } else {
+            this.router.navigate(['/matches']);
+          }
         },
         error: (err) => {
           this.isLoading = false;

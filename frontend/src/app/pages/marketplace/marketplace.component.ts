@@ -380,10 +380,13 @@ export class MarketplaceComponent implements OnInit {
   }
 
   get filteredTurfs(): Turf[] {
+    const q = (this.searchQuery || '').toLowerCase();
     return this.turfs.filter(t => {
-      const matchesSearch = t.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            t.city.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            t.district.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const name = (t.name || '').toLowerCase();
+      const city = (t.city || '').toLowerCase();
+      const district = (t.district || '').toLowerCase();
+      
+      const matchesSearch = name.includes(q) || city.includes(q) || district.includes(q);
       const matchesDistrict = this.selectedDistrict === 'ALL' || t.district === this.selectedDistrict;
       return matchesSearch && matchesDistrict;
     });

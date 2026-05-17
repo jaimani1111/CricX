@@ -56,14 +56,24 @@ import { AuthService } from '../../../core/auth/auth.service';
 
         <!-- ADMIN NAV -->
         <ng-container *ngIf="isAdmin() && !isSuperAdmin()">
-          <a routerLink="/admin/turf" routerLinkActive="active" class="nav-item">
+          <a routerLink="/admin/turf" [queryParams]="{tab: 'dashboard'}" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
             <mat-icon class="m-icon">dashboard</mat-icon>
             <span class="label">Dashboard</span>
             <div class="active-indicator"></div>
           </a>
-          <a routerLink="/marketplace" routerLinkActive="active" class="nav-item">
-            <mat-icon class="m-icon">storefront</mat-icon>
-            <span class="label">Market</span>
+          <a routerLink="/admin/turf" [queryParams]="{tab: 'my-venues'}" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
+            <mat-icon class="m-icon">stadium</mat-icon>
+            <span class="label">Venues</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/admin/turf" [queryParams]="{tab: 'register'}" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
+            <mat-icon class="m-icon">add_business</mat-icon>
+            <span class="label">Add Venue</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/admin/turf" [queryParams]="{tab: 'events'}" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
+            <mat-icon class="m-icon">military_tech</mat-icon>
+            <span class="label">Events</span>
             <div class="active-indicator"></div>
           </a>
           <a routerLink="/messages" routerLinkActive="active" class="nav-item">

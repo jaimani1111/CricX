@@ -48,7 +48,7 @@ import { AuthService } from '../../../core/auth/auth.service';
         <div class="auth-footer">
           <p>New here? <a routerLink="/auth/signup">Create player account</a></p>
           <div class="divider"><span>OR</span></div>
-          <p>Are you a Partner? <a routerLink="/auth/partner-signup">Partner Login</a></p>
+          <p>Are you a Partner? <a routerLink="/auth/partner-signup">Register as Partner</a></p>
         </div>
         </form>
       </div>
@@ -140,8 +140,12 @@ export class LoginComponent {
       this.isLoading = true;
       const { username, password } = this.loginForm.value;
       this.authService.login(username, password).subscribe({
-        next: () => {
-          this.router.navigate(['/matches']);
+        next: (res) => {
+          if (res?.role === 'ADMIN' || res?.role === 'SUPER_ADMIN') {
+            this.router.navigate(['/admin/turf'], { queryParams: { tab: 'dashboard' } });
+          } else {
+            this.router.navigate(['/matches']);
+          }
         },
         error: (err) => {
           this.isLoading = false;

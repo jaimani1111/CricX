@@ -173,9 +173,13 @@ export class OtpVerificationComponent implements OnInit {
     if (this.otpForm.valid) {
       this.loading = true;
       this.authService.verifyEmailOtp(this.email, this.otpForm.value.otp).subscribe({
-        next: () => {
+        next: (res) => {
           this.snackBar.open('Verification successful! Welcome to Playb! 🏏', 'Close', { duration: 4000 });
-          this.router.navigate(['/matches']);
+          if (res?.role === 'ADMIN' || res?.role === 'SUPER_ADMIN') {
+            this.router.navigate(['/admin/turf'], { queryParams: { tab: 'dashboard' } });
+          } else {
+            this.router.navigate(['/matches']);
+          }
         },
         error: (err) => {
           this.loading = false;
