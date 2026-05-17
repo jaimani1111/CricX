@@ -703,6 +703,20 @@ import { Router } from '@angular/router';
     .mt-2 { margin-top: 16px; }
     .mt-3 { margin-top: 24px; }
     .mb-4 { margin-bottom: 32px; }
+
+    @media (max-width: 1023px) {
+      .glass-header { padding: 40px 20px 20px !important; flex-direction: column; align-items: flex-start; gap: 16px; }
+      .tab-nav { padding: 0 20px !important; gap: 10px !important; overflow-x: auto; }
+      .tab-nav button { font-size: 13px; flex-shrink: 0; }
+      .dashboard-content { padding: 20px 16px 140px !important; }
+      .glass-card { padding: 20px !important; border-radius: 24px; }
+      .venue-header { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .venue-details-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+      .block-form { grid-template-columns: 1fr !important; gap: 12px !important; }
+      .toggle-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .price-editor-row { flex-direction: column; gap: 10px; }
+      .update-btn { height: 48px; }
+    }
   `]
 })
 export class TurfAdminDashboardComponent implements OnInit {
@@ -899,7 +913,17 @@ export class TurfAdminDashboardComponent implements OnInit {
       if (cf.key && cf.value) customFields[cf.key] = cf.value;
     });
 
-    const payload = { ...this.eventForm.value, customFields };
+    const formValues = { ...this.eventForm.value };
+    if (formValues.dateTime) {
+      formValues.dateTime = new Date(formValues.dateTime).toISOString();
+    }
+    if (formValues.endDateTime) {
+      formValues.endDateTime = new Date(formValues.endDateTime).toISOString();
+    } else {
+      formValues.endDateTime = null;
+    }
+
+    const payload = { ...formValues, customFields };
 
     this.adminService.createEvent(payload).subscribe({
       next: (ev) => {
@@ -909,7 +933,10 @@ export class TurfAdminDashboardComponent implements OnInit {
         this.eventForm.reset({ category: 'T20_MATCH', ticketPrice: 0, totalTickets: 100, umpireCount: 2, drinkBreakIntervalOvers: 10 });
         this.customFieldsList = [];
       },
-      error: () => this.isLoading = false
+      error: (err) => {
+        this.isLoading = false;
+        this.snackBar.open(err.error?.error || 'Failed to publish event', 'Close', { duration: 3000 });
+      }
     });
   }
 
