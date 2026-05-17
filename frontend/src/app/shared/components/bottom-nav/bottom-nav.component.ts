@@ -14,43 +14,106 @@ import { AuthService } from '../../../core/auth/auth.service';
       
       <!-- Brand Logo (Sidebar only) -->
       <div class="brand">
-        <div class="logo-box">C<span>X</span></div>
-        <span class="logo-text">CrickX</span>
+        <div class="logo-box">P<span>b</span></div>
+        <span class="logo-text">Playb</span>
       </div>
 
       <!-- Nav Items -->
       <div class="items-wrapper">
-        <a routerLink="/matches" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
-          <mat-icon class="m-icon">explore</mat-icon>
-          <span class="label">Browse</span>
-          <div class="active-indicator"></div>
-        </a>
-        
-        <a routerLink="/challenges" routerLinkActive="active" class="nav-item">
-          <mat-icon class="m-icon">emoji_events</mat-icon>
-          <span class="label">Challenges</span>
-          <div class="active-indicator"></div>
-        </a>
+        <!-- PLAYER NAV -->
+        <ng-container *ngIf="!isAdmin()">
+          <a routerLink="/matches" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
+            <mat-icon class="m-icon">explore</mat-icon>
+            <span class="label">Browse</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/challenges" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">emoji_events</mat-icon>
+            <span class="label">Challenges</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/tournaments" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">military_tech</mat-icon>
+            <span class="label">Tourneys</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/marketplace" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">stadium</mat-icon>
+            <span class="label">Book</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/players" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">groups</mat-icon>
+            <span class="label">Players</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/messages" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">chat</mat-icon>
+            <span class="label">Chat</span>
+            <div class="active-indicator"></div>
+          </a>
+        </ng-container>
 
-        <a routerLink="/tournaments" routerLinkActive="active" class="nav-item">
-          <mat-icon class="m-icon">military_tech</mat-icon>
-          <span class="label">Tourneys</span>
-          <div class="active-indicator"></div>
-        </a>
+        <!-- ADMIN NAV -->
+        <ng-container *ngIf="isAdmin() && !isSuperAdmin()">
+          <a routerLink="/admin/turf" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">dashboard</mat-icon>
+            <span class="label">Dashboard</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/marketplace" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">storefront</mat-icon>
+            <span class="label">Market</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/messages" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">chat</mat-icon>
+            <span class="label">Chat</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">person</mat-icon>
+            <span class="label">Profile</span>
+            <div class="active-indicator"></div>
+          </a>
+        </ng-container>
 
-        <a routerLink="/marketplace" routerLinkActive="active" class="nav-item">
-          <mat-icon class="m-icon">stadium</mat-icon>
-          <span class="label">Book</span>
-          <div class="active-indicator"></div>
-        </a>
-        
-        <a routerLink="/players" routerLinkActive="active" class="nav-item">
-          <mat-icon class="m-icon">groups</mat-icon>
-          <span class="label">Players</span>
-          <div class="active-indicator"></div>
-        </a>
-        
-        <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+        <!-- SUPER ADMIN NAV -->
+        <ng-container *ngIf="isSuperAdmin()">
+          <a routerLink="/matches" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-item">
+            <mat-icon class="m-icon">explore</mat-icon>
+            <span class="label">Browse</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/challenges" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">emoji_events</mat-icon>
+            <span class="label">Challenges</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/tournaments" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">military_tech</mat-icon>
+            <span class="label">Tourneys</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/marketplace" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">stadium</mat-icon>
+            <span class="label">Book</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/players" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">groups</mat-icon>
+            <span class="label">Players</span>
+            <div class="active-indicator"></div>
+          </a>
+          <a routerLink="/messages" routerLinkActive="active" class="nav-item">
+            <mat-icon class="m-icon">chat</mat-icon>
+            <span class="label">Chat</span>
+            <div class="active-indicator"></div>
+          </a>
+        </ng-container>
+
+        <!-- Profile (shared for non-admin) -->
+        <a *ngIf="!isAdmin()" routerLink="/profile" routerLinkActive="active" class="nav-item">
           <mat-icon class="m-icon">person</mat-icon>
           <span class="label">Profile</span>
           <div class="active-indicator"></div>
@@ -58,9 +121,9 @@ import { AuthService } from '../../../core/auth/auth.service';
       </div>
 
       <!-- Admin Links (Sidebar only) -->
-      <div class="admin-links" *ngIf="isAdmin()">
+      <div class="admin-links" *ngIf="isSuperAdmin()">
         <div class="section-label">Admin</div>
-        <a routerLink="/admin/super" routerLinkActive="active" class="nav-item" *ngIf="isSuperAdmin()">
+        <a routerLink="/admin/super" routerLinkActive="active" class="nav-item">
           <mat-icon class="m-icon">shield</mat-icon>
           <span class="label">Super Admin</span>
           <div class="active-indicator"></div>
@@ -103,7 +166,16 @@ import { AuthService } from '../../../core/auth/auth.service';
     }
 
     .brand, .nav-footer, .admin-links, .section-label { display: none; }
-    .items-wrapper { display: flex; width: 100%; justify-content: space-around; align-items: center; }
+    .items-wrapper {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 0 4px;
+    }
+    .items-wrapper::-webkit-scrollbar { display: none; }
 
     .nav-item {
       display: flex;
@@ -112,14 +184,16 @@ import { AuthService } from '../../../core/auth/auth.service';
       gap: 2px;
       text-decoration: none;
       color: var(--text-muted);
-      padding: 8px 16px;
+      padding: 8px 10px;
       position: relative;
       transition: color 0.2s ease;
       -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+      min-width: 60px;
     }
 
     .m-icon { font-size: 24px; width: 24px; height: 24px; }
-    .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
 
     .nav-item.active { color: var(--primary); }
 
@@ -161,7 +235,7 @@ import { AuthService } from '../../../core/auth/auth.service';
       .logo-box span { color: white; opacity: 0.8; }
       .logo-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: white; }
 
-      .items-wrapper { flex-direction: column; gap: 4px; width: 100%; }
+      .items-wrapper { flex-direction: column; gap: 4px; width: 100%; overflow-x: visible; }
 
       .nav-item {
         flex-direction: row; gap: 14px; width: 100%; padding: 12px 16px;

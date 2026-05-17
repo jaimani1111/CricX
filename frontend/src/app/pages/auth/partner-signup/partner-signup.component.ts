@@ -174,12 +174,17 @@ export class PartnerSignupComponent {
       this.isLoading = true;
       this.authService.signup(this.signupForm.value).subscribe({
         next: (res) => {
+          // Store token so partner is auto-logged-in
+          if (res.token) {
+            localStorage.setItem('crickx_token', res.token);
+            localStorage.setItem('crickx_user', JSON.stringify(res));
+          }
           this.snackBar.open('Registration successful! Welcome partner.', 'Close', { duration: 3000 });
-          this.router.navigate(['/matches']); // Or dashboard
+          this.router.navigate(['/admin/turf']); // Go to Partner Console
         },
         error: (err) => {
           this.isLoading = false;
-          this.snackBar.open(err.error?.message || 'Registration failed', 'Close', { duration: 3000 });
+          this.snackBar.open(err.error?.message || err.error?.error || 'Registration failed', 'Close', { duration: 3000 });
         }
       });
     }

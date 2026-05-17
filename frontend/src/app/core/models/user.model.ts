@@ -14,6 +14,7 @@ export interface User {
   latitude?: number;
   distance?: number;
   phone?: string;
+  profilePicture?: string;
 }
 
 export interface AuthResponse {
@@ -26,4 +27,5 @@ export interface AuthResponse {
   skill: string;
   preferredRole: string;
   rating: number;
+  profilePicture?: string;
 }

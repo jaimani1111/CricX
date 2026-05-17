@@ -7,8 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { AdminService } from '../../core/services/admin.service';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-setup-dev',
@@ -21,15 +22,21 @@ import { Router } from '@angular/router';
     <div class="setup-container luxury-bg min-h-screen">
       <div class="setup-card glass-card animate-fade-in">
         <div class="header">
-          <mat-icon class="dev-icon">terminal</mat-icon>
-          <h1>CrickX Developer Setup</h1>
-          <p>Bootstrap your administrative permissions</p>
+          <mat-icon class="dev-icon">shield</mat-icon>
+          <h1>Owner Console</h1>
+          <p>Platform owner access only</p>
         </div>
 
         <div class="form-content">
           <mat-form-field appearance="outline" class="full-width premium-field">
+            <mat-label>Secret Passphrase</mat-label>
+            <input matInput [(ngModel)]="secretKey" placeholder="Enter owner passphrase" type="password">
+            <mat-icon matSuffix>lock</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width premium-field">
             <mat-label>User Email</mat-label>
-            <input matInput [(ngModel)]="email" placeholder="e.g. boss424p@gmail.com" type="email">
+            <input matInput [(ngModel)]="email" placeholder="Owner email address" type="email">
             <mat-icon matSuffix>email</mat-icon>
           </mat-form-field>
 
@@ -38,11 +45,10 @@ import { Router } from '@angular/router';
             <mat-select [(ngModel)]="role">
               <mat-option value="SUPER_ADMIN">⚡ Super Admin</mat-option>
               <mat-option value="ADMIN">🛡️ Turf Admin</mat-option>
-              <mat-option value="PLAYER">👤 Player</mat-option>
             </mat-select>
           </mat-form-field>
 
-          <button mat-flat-button class="promote-btn" (click)="promote()" [disabled]="!email || loading">
+          <button mat-flat-button class="promote-btn" (click)="promote()" [disabled]="!email || !secretKey || loading">
             <span *ngIf="!loading">Apply Permissions</span>
             <span *ngIf="loading">Promoting...</span>
             <mat-icon *ngIf="!loading">bolt</mat-icon>
@@ -111,24 +117,31 @@ import { Router } from '@angular/router';
 export class SetupDevComponent {
   email = '';
   role = 'SUPER_ADMIN';
+  secretKey = '';
   loading = false;
 
+  private readonly API = environment.apiUrl + '/auth';
+
   constructor(
-    private adminService: AdminService,
+    private http: HttpClient,
     private snackBar: MatSnackBar,
     private router: Router
   ) {}
 
   promote() {
     this.loading = true;
-    this.adminService.promoteUser(this.email, this.role).subscribe({
+    this.http.post<any>(`${this.API}/promote-role`, {
+      email: this.email,
+      role: this.role,
+      secretKey: this.secretKey
+    }).subscribe({
       next: (res) => {
         this.loading = false;
         this.snackBar.open(res.message, 'Success', { duration: 5000 });
       },
       error: (err) => {
         this.loading = false;
-        this.snackBar.open(err.error?.error || 'Promotion failed', 'Close', { duration: 5000 });
+        this.snackBar.open(err.error?.error || 'Promotion failed — wrong passphrase?', 'Close', { duration: 5000 });
       }
     });
   }

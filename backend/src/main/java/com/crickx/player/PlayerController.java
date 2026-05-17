@@ -65,8 +65,17 @@ public class PlayerController {
                 User.PreferredRole.valueOf(body.get("preferredRole").toUpperCase()) : null;
 
         User updated = userService.updateProfile(
-                user.getId(), body.get("name"), skill, role, body.get("phone"));
+                user.getId(), body.get("name"), skill, role, body.get("phone"), body.get("profilePicture"));
         return ResponseEntity.ok(PlayerResponse.from(updated, null));
+    }
+
+    @PostMapping("/list")
+    public ResponseEntity<List<PlayerResponse>> getPlayersByIds(@RequestBody List<String> ids) {
+        List<User> players = userService.findAllByIds(ids);
+        List<PlayerResponse> response = players.stream()
+                .map(u -> PlayerResponse.from(u, null))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     private double calculateDistance(double lat1, double lng1, double lat2, double lng2) {

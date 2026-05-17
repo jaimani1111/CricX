@@ -4,10 +4,12 @@ com\crickx\challenge\dto\ChallengeResponse.class
 com\crickx\turf\TurfService.class
 com\crickx\tournament\TournamentRepository.class
 com\crickx\user\User$UserBuilder.class
+com\crickx\message\MessageController.class
 com\crickx\sport\SportRepository.class
 com\crickx\user\Role.class
 com\crickx\challenge\Challenge$ChallengeBuilder.class
 com\crickx\challenge\ChallengeController.class
+com\crickx\message\Message.class
 com\crickx\match\dto\MatchResponse$MatchResponseBuilder.class
 com\crickx\tournament\Tournament.class
 com\crickx\admin\SuperAdminService.class
@@ -24,6 +26,7 @@ com\crickx\user\UserRepository.class
 com\crickx\user\UserService.class
 com\crickx\config\WebSocketConfig.class
 com\crickx\turf\Turf$BlockedSlot.class
+com\crickx\message\MessageRepository.class
 com\crickx\auth\JwtTokenProvider.class
 com\crickx\turf\event\EventRepository.class
 com\crickx\auth\JwtAuthFilter.class
@@ -62,6 +65,8 @@ com\crickx\config\CorsConfig.class
 com\crickx\auth\EmailService.class
 com\crickx\challenge\Challenge.class
 com\crickx\sport\Sport.class
+com\crickx\message\Message$MessageBuilder.class
+com\crickx\message\MessageService.class
 com\crickx\player\dto\PlayerResponse$PlayerResponseBuilder.class
 com\crickx\tournament\TournamentService.class
 com\crickx\challenge\dto\ChallengeResponse$ChallengeResponseBuilder.class

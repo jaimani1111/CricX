@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { User } from '../../../core/models/user.model';
 
 @Component({
@@ -37,8 +38,8 @@ import { User } from '../../../core/models/user.model';
         </div>
       </div>
 
-      <button class="connect-btn">
-        <mat-icon>bolt</mat-icon>
+      <button class="connect-btn" (click)="messagePlayer($event)" title="Message this player">
+        <mat-icon>chat_bubble</mat-icon>
       </button>
     </div>
   `,
@@ -86,20 +87,21 @@ import { User } from '../../../core/models/user.model';
       z-index: 2;
     }
 
-    .player-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .player-content { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 
     .p-header { display: flex; justify-content: space-between; align-items: center; }
-    .p-name { font-weight: 700; font-size: 16px; letter-spacing: -0.3px; }
+    .p-name { font-weight: 700; font-size: 16px; letter-spacing: -0.3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     
     .p-rating {
       display: flex; align-items: center; gap: 4px;
       font-size: 11px; font-weight: 800; color: #F59E0B;
       background: rgba(245, 158, 11, 0.1);
       padding: 2px 8px; border-radius: 100px;
+      flex-shrink: 0;
     }
     .p-rating mat-icon { font-size: 12px; width: 12px; height: 12px; }
 
-    .p-badges { display: flex; gap: 8px; margin-top: 2px; }
+    .p-badges { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
     .l-badge {
       font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px;
       text-transform: uppercase;
@@ -114,25 +116,41 @@ import { User } from '../../../core/models/user.model';
     .p-loc mat-icon { font-size: 14px; width: 14px; height: 14px; color: var(--primary); }
 
     .connect-btn {
-      width: 36px; height: 36px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255,255,255,0.05);
+      width: 40px; height: 40px;
+      background: rgba(74, 222, 128, 0.08);
+      border: 1px solid rgba(74, 222, 128, 0.15);
       border-radius: 12px;
-      color: var(--text-muted);
+      color: var(--primary);
       cursor: pointer;
       transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-    .player-premium-card:hover .connect-btn {
+    .connect-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    .connect-btn:hover {
       background: var(--primary);
       color: #0F172A;
       box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+      transform: scale(1.1);
     }
   `]
 })
 export class PlayerCardComponent {
   @Input() player!: User;
 
+  constructor(private router: Router) {}
+
   formatRole(role: string): string {
     return role.replace(/_/g, ' ').toLowerCase();
+  }
+
+  messagePlayer(event: Event) {
+    event.stopPropagation();
+    this.router.navigate(['/messages'], {
+      queryParams: {
+        userId: this.player.id,
+        userName: this.player.name
+      }
+    });
   }
 }

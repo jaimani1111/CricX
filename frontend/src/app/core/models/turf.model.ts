@@ -33,4 +33,8 @@ export interface BlockedSlot {
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   reason: string;
+  bookedByUserId?: string;
+  bookedByUserName?: string;
+  bookedByUserPhone?: string;
+  status?: string;
 }

@@ -26,4 +26,11 @@ public class AdminEventController {
     public ResponseEntity<List<Event>> getMyEvents(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(eventService.getMyEvents(user.getId()));
     }
+
+    @GetMapping("/{eventId}/participants")
+    public ResponseEntity<List<User>> getEventParticipants(
+            @PathVariable String eventId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventService.getEventParticipants(eventId, user.getId()));
+    }
 }

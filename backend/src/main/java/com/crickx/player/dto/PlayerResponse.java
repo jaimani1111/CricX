@@ -24,6 +24,8 @@ public class PlayerResponse {
     private Double latitude;
     private Double distance;
     private String phone;
+    private String profilePicture;
+    private String username;
 
     public static PlayerResponse from(User u, Double distanceKm) {
         return PlayerResponse.builder()
@@ -39,6 +41,8 @@ public class PlayerResponse {
                 .latitude(u.getLocation() != null ? u.getLocation().getY() : null)
                 .distance(distanceKm != null ? Math.round(distanceKm * 10.0) / 10.0 : null)
                 .phone(u.getPhone())
+                .profilePicture(u.getProfilePicture())
+                .username(u.getUsername())
                 .build();
     }
 }

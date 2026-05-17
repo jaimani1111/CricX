@@ -8,6 +8,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { AdminService } from '../../../core/services/admin.service';
 import { Turf, BlockedSlot } from '../../../core/models/turf.model';
 import { LocationService } from '../../../core/services/location.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-turf-admin-dashboard',
@@ -91,9 +92,54 @@ import { LocationService } from '../../../core/services/location.service';
                     <button class="block-action-btn" (click)="blockSlot(turf)">Block</button>
                   </div>
                 </div>
+              </div> <!-- Closes venue-grid -->
+
+              <!-- PLAYER SLOT BOOKINGS SECTION -->
+              <div class="config-section full-width mt-4">
+                <h3><mat-icon>menu_book</mat-icon> Player Slot Bookings & Reservations</h3>
+                <div class="bookings-drawer-container">
+                  <table class="bookings-table-admin" *ngIf="getPlayerBookings(turf).length > 0; else noBookings">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time Slot</th>
+                        <th>Player Name</th>
+                        <th>Phone</th>
+                        <th>Reason / Team</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let booking of getPlayerBookings(turf)">
+                        <td><span class="booking-date-badge">{{ booking.date }}</span></td>
+                        <td><span class="booking-time-badge">{{ booking.startTime }} - {{ booking.endTime }}</span></td>
+                        <td>
+                          <div class="player-booking-info">
+                            <span class="p-letter">{{ booking.bookedByUserName?.charAt(0)?.toUpperCase() || 'P' }}</span>
+                            <strong>{{ booking.bookedByUserName }}</strong>
+                          </div>
+                        </td>
+                        <td>{{ booking.bookedByUserPhone || 'N/A' }}</td>
+                        <td><em>{{ booking.reason }}</em></td>
+                        <td>
+                          <button class="message-booking-btn" (click)="messagePlayerFromBooking(booking); $event.stopPropagation()">
+                            <mat-icon>chat</mat-icon> Message Player
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  
+                  <ng-template #noBookings>
+                    <div class="no-bookings-placeholder">
+                      <mat-icon>sentiment_satisfied_alt</mat-icon>
+                      <p>No player bookings yet. Active bookings will show up here instantly!</p>
+                    </div>
+                  </ng-template>
+                </div>
               </div>
-            </div>
-          </div>
+            </div> <!-- closes venue-config-card -->
+          </div> <!-- closes venue-list -->
           <ng-template #noTurfs>
             <div class="empty-state glass-card">
               <mat-icon>storefront</mat-icon>
@@ -409,21 +455,74 @@ import { LocationService } from '../../../core/services/location.service';
 
           <div class="my-events-list mt-4" *ngIf="myEvents.length > 0">
             <h3>My Organised Events</h3>
-            <div class="event-mini-card glass-card mt-2" *ngFor="let e of myEvents">
-               <div class="e-meta">
-                  <h4>{{ e.title }}</h4>
-                  <span class="e-cat">{{ e.category }}</span>
-                  <div class="e-tags-row">
-                    <span class="e-tag" *ngIf="e.hasUmpires">👨‍⚖️ Umpires</span>
-                    <span class="e-tag" *ngIf="e.hasLiveTelecast">📡 Live</span>
-                    <span class="e-tag" *ngIf="e.hasDrinkBreaks">🥤 Breaks</span>
-                    <span class="e-tag" *ngIf="e.prizes">🏆 Prizes</span>
+            <div class="event-card-container mt-2" *ngFor="let e of myEvents">
+              <div class="event-mini-card glass-card" (click)="toggleEventParticipants(e.id)" [class.expanded]="expandedEventId === e.id">
+                 <div class="e-meta">
+                    <h4>{{ e.title }}</h4>
+                    <span class="e-cat">{{ e.category }}</span>
+                    <div class="e-tags-row">
+                      <span class="e-tag" *ngIf="e.hasUmpires">👨‍⚖️ Umpires</span>
+                      <span class="e-tag" *ngIf="e.hasLiveTelecast">📡 Live</span>
+                      <span class="e-tag" *ngIf="e.hasDrinkBreaks">🥤 Breaks</span>
+                      <span class="e-tag" *ngIf="e.prizes">🏆 Prizes</span>
+                    </div>
+                 </div>
+                 <div class="e-stats">
+                    <span class="registration-count-pill"><mat-icon>people</mat-icon> {{ e.registeredUserIds?.length || 0 }} registered</span>
+                    <span>₹{{ e.ticketPrice }} / ticket</span>
+                 </div>
+              </div>
+
+              <!-- COLLAPSIBLE PARTICIPANT DETAILS -->
+              <div class="participant-drawer glass-card" *ngIf="expandedEventId === e.id">
+                <div class="drawer-header">
+                  <h4><mat-icon>groups</mat-icon> Registered Players</h4>
+                  <div class="spinner-inline" *ngIf="participantsLoading[e.id]">
+                    <span class="loading-text">Fetching player records...</span>
                   </div>
-               </div>
-               <div class="e-stats">
-                  <span>{{ e.registeredUserIds?.length || 0 }} registrations</span>
-                  <span>₹{{ e.ticketPrice }} / ticket</span>
-               </div>
+                </div>
+
+                <div class="participants-list" *ngIf="!participantsLoading[e.id]">
+                  <table class="participants-table" *ngIf="participantsMap[e.id] && participantsMap[e.id].length > 0; else noPlayers">
+                    <thead>
+                      <tr>
+                        <th>Player Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Skill / Role</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let player of participantsMap[e.id]">
+                        <td>
+                          <div class="p-name-cell">
+                            <span class="avatar-letter">{{ player.name.charAt(0).toUpperCase() }}</span>
+                            <span class="p-real-name">{{ player.name }}</span>
+                          </div>
+                        </td>
+                        <td>{{ player.email }}</td>
+                        <td>{{ player.phone || 'N/A' }}</td>
+                        <td>
+                          <span class="mini-skill-badge">{{ player.skill || 'PLAYER' }}</span>
+                          <span class="mini-role-badge" *ngIf="player.preferredRole"> / {{ player.preferredRole }}</span>
+                        </td>
+                        <td>
+                          <button class="message-action-btn" (click)="messagePlayer(player); $event.stopPropagation()">
+                            <mat-icon>chat</mat-icon> Message
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <ng-template #noPlayers>
+                    <div class="no-participants-msg">
+                      <mat-icon>info_outline</mat-icon>
+                      <p>No players have registered for this event yet.</p>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -474,6 +573,26 @@ import { LocationService } from '../../../core/services/location.service';
     .block-form { display: grid; grid-template-columns: 1fr 0.8fr 0.8fr auto; gap: 10px; }
     .block-form input { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; height: 48px; padding: 0 12px; color: white; }
     .block-action-btn { background: #EF4444; color: white; border: none; border-radius: 12px; font-weight: 700; padding: 0 15px; cursor: pointer; }
+
+    /* Admin Bookings Table */
+    .bookings-drawer-container { background: rgba(0, 0, 0, 0.15); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; overflow-x: auto; }
+    .bookings-table-admin { width: 100%; border-collapse: collapse; text-align: left; }
+    .bookings-table-admin th { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    .bookings-table-admin td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; color: rgba(255,255,255,0.8); }
+    
+    .booking-date-badge { background: rgba(59, 130, 246, 0.1); color: #3B82F6; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+    .booking-time-badge { background: rgba(245, 158, 11, 0.1); color: #F59E0B; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+    
+    .player-booking-info { display: flex; align-items: center; gap: 8px; }
+    .p-letter { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #0F172A; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; }
+    
+    .message-booking-btn { background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.2); color: var(--primary); border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; }
+    .message-booking-btn:hover { background: var(--primary); color: #0F172A; }
+    .message-booking-btn mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    
+    .no-bookings-placeholder { text-align: center; padding: 30px 0; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .no-bookings-placeholder mat-icon { font-size: 36px; width: 36px; height: 36px; opacity: 0.5; color: var(--primary); }
+    .no-bookings-placeholder p { margin: 0; font-size: 13px; }
 
     /* MULTI-STEP REGISTRATION */
     .step-indicator { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 40px; }
@@ -535,7 +654,39 @@ import { LocationService } from '../../../core/services/location.service';
     .add-cf-btn:hover { background: rgba(255,255,255,0.06); color: var(--primary); border-color: rgba(74, 222, 128, 0.3); }
     .hint-text { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 12px; }
 
-    .event-mini-card { display: flex; justify-content: space-between; align-items: center; padding: 20px !important; }
+    /* Organized Events and Participant Drawer */
+    .event-card-container { margin-bottom: 12px; }
+    .event-mini-card { display: flex; justify-content: space-between; align-items: center; padding: 20px !important; cursor: pointer; transition: all 0.3s; }
+    .event-mini-card:hover { border-color: var(--primary); background: rgba(74, 222, 128, 0.04); }
+    .event-mini-card.expanded { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-color: var(--primary); }
+    
+    .registration-count-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 100px; font-weight: 700; font-size: 12px; }
+    .registration-count-pill mat-icon { font-size: 14px; width: 14px; height: 14px; }
+
+    .participant-drawer { border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; border-top: none !important; background: rgba(15, 23, 42, 0.6) !important; padding: 24px !important; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .drawer-header h4 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; }
+    .drawer-header h4 mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+    .participants-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .participants-table th { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 700; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .participants-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; color: rgba(255,255,255,0.8); }
+
+    .p-name-cell { display: flex; align-items: center; gap: 10px; }
+    .avatar-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #0F172A; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+    .p-real-name { font-weight: 700; color: white; }
+
+    .mini-skill-badge { font-size: 9px; font-weight: 800; background: rgba(74, 222, 128, 0.1); color: var(--primary); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .mini-role-badge { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+    .message-action-btn { background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.2); color: var(--primary); border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; }
+    .message-action-btn:hover { background: var(--primary); color: #0F172A; }
+    .message-action-btn mat-icon { font-size: 14px; width: 14px; height: 14px; }
+
+    .no-participants-msg { text-align: center; padding: 20px 0; color: rgba(255,255,255,0.4); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .no-participants-msg mat-icon { font-size: 32px; width: 32px; height: 32px; opacity: 0.5; }
+    .no-participants-msg p { margin: 0; font-size: 13px; }
+
     .e-meta h4 { margin: 0; font-size: 16px; }
     .e-cat { font-size: 10px; text-transform: uppercase; color: #F59E0B; font-weight: 800; }
     .e-tags-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
@@ -575,6 +726,10 @@ export class TurfAdminDashboardComponent implements OnInit {
   // Dynamic custom fields
   customFieldsList: { key: string; value: string }[] = [];
 
+  expandedEventId: string | null = null;
+  participantsMap: { [eventId: string]: any[] } = {};
+  participantsLoading: { [eventId: string]: boolean } = {};
+
   allSportsList = ['Cricket', 'Football', 'Tennis', 'Basketball', 'Badminton', 'Pickleball'];
   allFacilitiesList = ['Floodlights', 'Parking', 'Washroom', 'Changing Room', 'Cafeteria', 'Water', 'Medical Kit'];
 
@@ -582,7 +737,8 @@ export class TurfAdminDashboardComponent implements OnInit {
     private fb: FormBuilder,
     private adminService: AdminService,
     private locationService: LocationService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {
     this.turfForm = this.fb.group({
       name: ['', Validators.required],
@@ -649,7 +805,7 @@ export class TurfAdminDashboardComponent implements OnInit {
   getTabSubtext() {
     switch(this.activeTab) {
       case 'my-venues': return 'Manage your premium turfs & availability';
-      case 'register': return 'Join the elite CricX venue network';
+      case 'register': return 'Join the elite Playb venue network';
       case 'events': return 'Organise professional matches and stadium events';
     }
   }
@@ -769,6 +925,49 @@ export class TurfAdminDashboardComponent implements OnInit {
       const i = this.myTurfs.findIndex(x => x.id === t.id);
       if (i > -1) this.myTurfs[i] = t;
       this.snackBar.open('Slot Blocked', 'Close', { duration: 3000 });
+    });
+  }
+
+  toggleEventParticipants(eventId: string) {
+    if (this.expandedEventId === eventId) {
+      this.expandedEventId = null;
+      return;
+    }
+    this.expandedEventId = eventId;
+    if (!this.participantsMap[eventId]) {
+      this.participantsLoading[eventId] = true;
+      this.adminService.getEventParticipants(eventId).subscribe({
+        next: (users) => {
+          this.participantsMap[eventId] = users;
+          this.participantsLoading[eventId] = false;
+        },
+        error: () => {
+          this.participantsLoading[eventId] = false;
+          this.snackBar.open('Failed to load registered players', 'Close', { duration: 3000 });
+        }
+      });
+    }
+  }
+
+  messagePlayer(player: any) {
+    this.router.navigate(['/messages'], {
+      queryParams: {
+        userId: player.id,
+        userName: player.name
+      }
+    });
+  }
+
+  getPlayerBookings(turf: Turf): any[] {
+    return (turf.manuallyBlockedSlots || []).filter(slot => slot.bookedByUserId != null);
+  }
+
+  messagePlayerFromBooking(booking: any) {
+    this.router.navigate(['/messages'], {
+      queryParams: {
+        userId: booking.bookedByUserId,
+        userName: booking.bookedByUserName
+      }
     });
   }
 }

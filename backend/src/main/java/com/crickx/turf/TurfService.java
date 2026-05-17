@@ -1,5 +1,7 @@
 package com.crickx.turf;
 
+import com.crickx.message.MessageService;
+import com.crickx.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
 public class TurfService {
 
     private final TurfRepository turfRepository;
+    private final MessageService messageService;
 
     public Turf createTurf(Turf turf) {
         if (turf.getManuallyBlockedSlots() == null) {
@@ -29,6 +32,47 @@ public class TurfService {
         }
         turf.getManuallyBlockedSlots().add(slot);
         return turfRepository.save(turf);
+    }
+
+    public Turf bookPlayerSlot(String turfId, Turf.BlockedSlot slot, User user) {
+        Turf turf = getTurfById(turfId);
+        
+        slot.setBookedByUserId(user.getId());
+        slot.setBookedByUserName(user.getName());
+        slot.setBookedByUserPhone(user.getPhone() != null ? user.getPhone() : "");
+        slot.setStatus("APPROVED");
+        if (slot.getReason() == null || slot.getReason().isBlank()) {
+            slot.setReason("Player Booking: " + user.getName());
+        }
+
+        if (turf.getManuallyBlockedSlots() == null) {
+            turf.setManuallyBlockedSlots(new java.util.ArrayList<>());
+        }
+        
+        // Overlap verification
+        for (Turf.BlockedSlot existing : turf.getManuallyBlockedSlots()) {
+            if (existing.getDate().equals(slot.getDate())) {
+                if (existing.getStartTime().equals(slot.getStartTime())) {
+                    throw new RuntimeException("This slot is already booked!");
+                }
+            }
+        }
+        
+        turf.getManuallyBlockedSlots().add(slot);
+        Turf saved = turfRepository.save(turf);
+        
+        // Notify turf owner/admin via Chat!
+        try {
+            String notificationText = String.format(
+                "System Booking Alert 🏟️: Player '%s' has booked a slot at your venue '%s' on %s from %s to %s.",
+                user.getName(), turf.getName(), slot.getDate(), slot.getStartTime(), slot.getEndTime()
+            );
+            messageService.sendMessage(user.getId(), turf.getOwnerId(), notificationText);
+        } catch (Exception e) {
+            System.err.println("Failed to send booking notification chat: " + e.getMessage());
+        }
+        
+        return saved;
     }
 
     public Turf updateTurf(String turfId, Turf updatedTurf) {
@@ -61,8 +105,7 @@ public class TurfService {
     }
 
     public List<Turf> findNearby(double lng, double lat, double radiusKm) {
-        // Simple implementation for now, can be optimized with Mongo distance query
-        return turfRepository.findAll(); // Placeholder logic
+        return turfRepository.findAll();
     }
 
     public Turf getTurfById(String id) {

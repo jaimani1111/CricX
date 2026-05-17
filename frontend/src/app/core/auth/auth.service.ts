@@ -58,6 +58,15 @@ export class AuthService {
     return this._currentUser()?.userId ?? null;
   }
 
+  updateStoredUser(updatedFields: Partial<AuthResponse>): void {
+    const current = this._currentUser();
+    if (current) {
+      const merged = { ...current, ...updatedFields };
+      localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+      this._currentUser.set(merged);
+    }
+  }
+
   private storeAuth(res: AuthResponse): void {
     if (res.token) {
       localStorage.setItem(this.TOKEN_KEY, res.token);

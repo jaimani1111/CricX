@@ -66,6 +66,8 @@ public class User {
 
     private String phone;
 
+    private String profilePicture;
+
     @CreatedDate
     private Instant createdAt;
 

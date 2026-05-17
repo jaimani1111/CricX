@@ -46,13 +46,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateProfile(String userId, String name, User.SkillLevel skill, User.PreferredRole role, String phone) {
+    public User updateProfile(String userId, String name, User.SkillLevel skill, User.PreferredRole role, String phone, String profilePicture) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (name != null) user.setName(name);
         if (skill != null) user.setSkill(skill);
         if (role != null) user.setPreferredRole(role);
         if (phone != null) user.setPhone(phone);
+        if (profilePicture != null) user.setProfilePicture(profilePicture);
         return userRepository.save(user);
+    }
+
+    public List<User> findAllByIds(List<String> ids) {
+        return (List<User>) userRepository.findAllById(ids);
     }
 }

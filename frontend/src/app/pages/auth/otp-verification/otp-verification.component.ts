@@ -174,7 +174,7 @@ export class OtpVerificationComponent implements OnInit {
       this.loading = true;
       this.authService.verifyEmailOtp(this.email, this.otpForm.value.otp).subscribe({
         next: () => {
-          this.snackBar.open('Verification successful! Welcome to CrickX! 🏏', 'Close', { duration: 4000 });
+          this.snackBar.open('Verification successful! Welcome to Playb! 🏏', 'Close', { duration: 4000 });
           this.router.navigate(['/matches']);
         },
         error: (err) => {

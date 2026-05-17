@@ -32,4 +32,8 @@ export class PlayerService {
   updateProfile(data: Partial<User>): Observable<User> {
     return this.http.put<User>(`${this.API}/me`, data);
   }
+
+  getPlayersByIds(ids: string[]): Observable<User[]> {
+    return this.http.post<User[]>(`${this.API}/list`, ids);
+  }
 }

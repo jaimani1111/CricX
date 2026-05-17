@@ -67,6 +67,10 @@ export class AdminService {
     return this.http.get<Turf>(`${this.PUBLIC_TURF_API}/${id}`);
   }
 
+  bookTurfSlot(turfId: string, slot: BlockedSlot): Observable<Turf> {
+    return this.http.post<Turf>(`${this.PUBLIC_TURF_API}/${turfId}/book`, slot);
+  }
+
   // Events Management (Admin)
   createEvent(event: any): Observable<any> {
     return this.http.post<any>(this.ADMIN_EVENT_API, event);
@@ -74,6 +78,10 @@ export class AdminService {
 
   getMyEvents(): Observable<any[]> {
     return this.http.get<any[]>(`${this.ADMIN_EVENT_API}/my`);
+  }
+
+  getEventParticipants(eventId: string): Observable<User[]> {
+    return this.http.get<User[]>(`${this.ADMIN_EVENT_API}/${eventId}/participants`);
   }
 
   // Events Discovery (Public)

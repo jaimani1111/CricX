@@ -59,10 +59,15 @@ public class Turf {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class BlockedSlot {
         private String date; // YYYY-MM-DD
         private String startTime; // HH:mm
         private String endTime; // HH:mm
         private String reason;
+        private String bookedByUserId;
+        private String bookedByUserName;
+        private String bookedByUserPhone;
+        private String status; // PENDING, APPROVED, CANCELLED
     }
 }

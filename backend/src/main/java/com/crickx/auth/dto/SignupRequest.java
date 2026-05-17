@@ -1,5 +1,6 @@
 package com.crickx.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -25,5 +26,7 @@ public class SignupRequest {
     private String skill;        // BEGINNER, INTERMEDIATE, ADVANCED
     private String preferredRole; // BATSMAN, BOWLER, ALL_ROUNDER, WICKET_KEEPER
     private String phone;
-    private boolean isPartner; // If true, registers as ADMIN
+
+    @JsonProperty("isPartner")
+    private boolean partner; // If true, registers as ADMIN
 }

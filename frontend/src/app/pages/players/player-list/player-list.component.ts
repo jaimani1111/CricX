@@ -120,6 +120,10 @@ import { PlayerCardComponent } from '../../../shared/components/player-card/play
 
     @media (max-width: 480px) {
       .players-list { grid-template-columns: 1fr; }
+      .header-content { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .availability-card { width: 100%; }
+      h1 { font-size: 28px; }
+      .glass-header { padding: 50px 16px 20px; }
     }
 
     .search-row {
