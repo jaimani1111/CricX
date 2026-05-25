@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,12 @@ import { SUPPORTED_SPORTS } from '../../../core/models/sport.model';
   imports: [CommonModule, MatIconModule, MatButtonModule],
   template: `
     <div class="challenge-card card-stagger animate-fade-in-up">
+      <!-- Top Timer Strip -->
+      <div class="timer-strip" *ngIf="timeUntilStart">
+        <mat-icon>timer</mat-icon>
+        <span>{{ timeUntilStart }}</span>
+      </div>
+
       <div class="card-header">
         <div class="format-badge">⚔️ {{ formatLabel(challenge.format) }}</div>
         <div class="status-badge" [ngClass]="'status-' + challenge.status.toLowerCase()">
@@ -79,6 +85,22 @@ import { SUPPORTED_SPORTS } from '../../../core/models/sport.model';
       align-items: center;
       margin-bottom: var(--spacing-md);
     }
+
+    .timer-strip {
+      background: rgba(255, 107, 53, 0.1);
+      color: #FF6B35;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .timer-strip mat-icon { font-size: 14px; width: 14px; height: 14px; }
 
     .format-badge {
       font-size: var(--font-size-xs);
@@ -193,10 +215,46 @@ import { SUPPORTED_SPORTS } from '../../../core/models/sport.model';
     }
   `]
 })
-export class ChallengeCardComponent {
+export class ChallengeCardComponent implements OnInit, OnDestroy {
   @Input() challenge!: Challenge;
   @Input() isOwner = false;
   @Output() accept = new EventEmitter<string>();
+
+  timeUntilStart: string = '';
+  private timerInterval: any;
+
+  ngOnInit() {
+    this.updateTimer();
+    this.timerInterval = setInterval(() => this.updateTimer(), 60000); // update every min
+  }
+
+  ngOnDestroy() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+  }
+
+  updateTimer() {
+    if (!this.challenge || !this.challenge.dateTime) return;
+    const start = new Date(this.challenge.dateTime).getTime();
+    const now = new Date().getTime();
+    const diff = start - now;
+
+    if (diff <= 0) {
+      this.timeUntilStart = 'Started';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) {
+      this.timeUntilStart = `Starts in ${days}d ${hours}h`;
+    } else if (hours > 0) {
+      this.timeUntilStart = `Starts in ${hours}h ${mins}m`;
+    } else {
+      this.timeUntilStart = `Starts in ${mins}m`;
+    }
+  }
 
   getSportIcon(sportId: string): string {
     const sport = SUPPORTED_SPORTS.find(s => s.id === sportId);

@@ -19,7 +19,7 @@ import { LocationService } from '../../../core/services/location.service';
           <h1>🏆 Tournaments</h1>
           <p class="subtitle">Compete, win prizes, and rise through the ranks</p>
         </div>
-        <a *ngIf="isAdmin()" routerLink="/tournaments/create" class="create-btn">
+        <a routerLink="/tournaments/create" class="create-btn">
           <mat-icon>add</mat-icon>
           <span>Create Tournament</span>
         </a>

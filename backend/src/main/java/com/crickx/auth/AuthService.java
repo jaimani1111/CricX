@@ -36,8 +36,6 @@ public class AuthService {
                 .username(request.getUsername().toLowerCase())
                 .email(request.getEmail().toLowerCase())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .skill(parseSkill(request.getSkill()))
-                .preferredRole(parseRole(request.getPreferredRole()))
                 .phone(request.getPhone())
                 .role(request.isPartner() ? Role.ADMIN : Role.PLAYER) // Register as ADMIN if partner
                 .isEmailVerified(true)  // Auto-verify in dev
@@ -109,21 +107,4 @@ public class AuthService {
         return AuthResponse.from(token, user);
     }
 
-    private User.SkillLevel parseSkill(String skill) {
-        if (skill == null) return User.SkillLevel.INTERMEDIATE;
-        try {
-            return User.SkillLevel.valueOf(skill.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return User.SkillLevel.INTERMEDIATE;
-        }
-    }
-
-    private User.PreferredRole parseRole(String role) {
-        if (role == null) return null;
-        try {
-            return User.PreferredRole.valueOf(role.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
 }

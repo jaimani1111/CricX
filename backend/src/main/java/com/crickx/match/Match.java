@@ -34,6 +34,7 @@ public class Match {
     private GeoJsonPoint location;
 
     private Instant dateTime;
+    private Instant endTime;
 
     @Builder.Default
     private int totalPlayers = 12;

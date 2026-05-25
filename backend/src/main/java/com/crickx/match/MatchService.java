@@ -36,6 +36,7 @@ public class MatchService {
                 .locationName(request.getLocationName())
                 .location(new GeoJsonPoint(request.getLongitude(), request.getLatitude()))
                 .dateTime(Instant.parse(request.getDateTime()))
+                .endTime(Instant.parse(request.getDateTime()).plusSeconds(3600 * 2)) // default 2 hrs
                 .totalPlayers(request.getTotalPlayers())
                 .costPerPlayer(request.getCostPerPlayer())
                 .skillLevel(parseSkillLevel(request.getSkillLevel()))
@@ -138,6 +139,7 @@ public class MatchService {
         }
 
         return matches.stream()
+                .filter(m -> m.getEndTime() == null || m.getEndTime().isAfter(Instant.now()))
                 .filter(m -> maxCost == null || m.getCostPerPlayer() <= maxCost)
                 .map(m -> {
                     double dist = calculateDistance(lat, lng,

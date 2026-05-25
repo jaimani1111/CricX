@@ -48,6 +48,7 @@ public class Challenge {
     private GeoJsonPoint location;
 
     private Instant dateTime;
+    private Instant endTime;
 
     @Builder.Default
     private ChallengeFormat format = ChallengeFormat.ELEVEN_V_ELEVEN;

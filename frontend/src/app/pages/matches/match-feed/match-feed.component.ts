@@ -28,9 +28,36 @@ import { SUPPORTED_SPORTS, Sport } from '../../../core/models/sport.model';
         <div class="header-row">
           <div class="location-block">
             <mat-icon class="loc-icon">near_me</mat-icon>
-            <div class="loc-text">
+            <div class="loc-text" *ngIf="!editingLocation">
               <span class="loc-label">Playing at</span>
-              <span class="loc-name">{{ locationName || 'Detecting...' }}</span>
+              <div class="loc-name-row">
+                <span class="loc-name">{{ locationName || 'Detecting...' }}</span>
+                <button mat-icon-button class="tiny-icon-btn" (click)="editingLocation = true"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button class="tiny-icon-btn" (click)="redetectLocation()"><mat-icon>my_location</mat-icon></button>
+              </div>
+            </div>
+            <div class="loc-text edit-mode" *ngIf="editingLocation">
+              <span class="loc-label">Enter City</span>
+              <div class="loc-edit-row" style="position: relative;">
+                <input type="text" [(ngModel)]="manualLocationInput" 
+                       placeholder="e.g. Mumbai" 
+                       (keyup.enter)="applyManualLocation()"
+                       (input)="onLocationInput($event)"
+                       (focus)="showSuggestions = locationSuggestions.length > 0"
+                       autocomplete="off">
+                <button mat-icon-button class="tiny-icon-btn confirm" (click)="applyManualLocation()"><mat-icon>check</mat-icon></button>
+                <button mat-icon-button class="tiny-icon-btn cancel" (click)="editingLocation = false; showSuggestions = false"><mat-icon>close</mat-icon></button>
+
+                <!-- Autocomplete Dropdown -->
+                <div class="loc-suggestions" *ngIf="showSuggestions && locationSuggestions.length > 0">
+                  <div class="loc-suggestion-item" 
+                       *ngFor="let s of locationSuggestions" 
+                       (click)="selectSuggestion(s)">
+                    <mat-icon class="sug-icon">place</mat-icon>
+                    <span>{{ s.locationName }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -162,7 +189,75 @@ import { SUPPORTED_SPORTS, Sport } from '../../../core/models/sport.model';
     .loc-icon { color: var(--primary); font-size: 22px; width: 22px; height: 22px; }
     .loc-text { display: flex; flex-direction: column; }
     .loc-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .loc-name-row { display: flex; align-items: center; gap: 4px; }
     .loc-name { font-size: 16px; font-weight: 700; }
+    
+    .tiny-icon-btn { width: 28px !important; height: 28px !important; padding: 4px !important; display: flex; align-items: center; justify-content: center; }
+    .tiny-icon-btn mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--text-muted); }
+    .tiny-icon-btn:hover mat-icon { color: white; }
+    .tiny-icon-btn.confirm mat-icon { color: var(--primary); }
+    .tiny-icon-btn.cancel mat-icon { color: var(--accent-red); }
+
+    .loc-edit-row { display: flex; align-items: center; gap: 4px; position: relative; }
+    .loc-edit-row input { 
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+      color: white; border-radius: 6px; padding: 4px 8px; font-size: 14px; width: 120px; outline: none;
+    }
+    .loc-edit-row input:focus { border-color: var(--primary); }
+
+    /* Location Autocomplete Dropdown */
+    .loc-suggestions {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 240px;
+      max-height: 220px;
+      overflow-y: auto;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      animation: sugDropIn 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      scrollbar-width: thin;
+    }
+    .loc-suggestions::-webkit-scrollbar { width: 4px; }
+    .loc-suggestions::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    @keyframes sugDropIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .loc-suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .loc-suggestion-item:last-child { border-bottom: none; }
+    .loc-suggestion-item:hover {
+      background: rgba(74, 222, 128, 0.08);
+      color: white;
+    }
+    .loc-suggestion-item:active {
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .sug-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
 
     /* Sport Strip */
     .sport-strip {
@@ -269,7 +364,7 @@ import { SUPPORTED_SPORTS, Sport } from '../../../core/models/sport.model';
 
     /* Expandable FAB */
     .fab-wrapper {
-      position: fixed; bottom: 88px; right: 24px; z-index: 999;
+      position: fixed; bottom: 70px; right: 24px; z-index: 999;
       display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
     }
     .fab-options {
@@ -346,8 +441,13 @@ export class MatchFeedComponent implements OnInit, OnDestroy {
   searchQuery = '';
   loading = true;
   locationName = 'Detecting...';
+  editingLocation = false;
+  manualLocationInput = '';
   userId = '';
   sports: Sport[] = SUPPORTED_SPORTS;
+  locationSuggestions: any[] = [];
+  showSuggestions = false;
+  private locationDebounceTimer: any;
   
   private destroy$ = new Subject<void>();
   private currentLat = 19.076;
@@ -368,14 +468,67 @@ export class MatchFeedComponent implements OnInit, OnDestroy {
     this.loadMatches();
 
     this.locationService.getCurrentLocation().then(loc => {
-      this.currentLat = loc.latitude;
-      this.currentLng = loc.longitude;
-      this.locationName = loc.locationName || 'Detecting...';
-      this.loadMatches();
+      this.updateLocationState(loc);
     }).catch(() => {
       this.locationName = 'Mumbai';
       this.loadMatches();
     });
+  }
+
+  updateLocationState(loc: any) {
+    this.currentLat = loc.latitude;
+    this.currentLng = loc.longitude;
+    this.locationName = loc.locationName || 'Mumbai';
+    this.manualLocationInput = this.locationName;
+    this.loadMatches();
+  }
+
+  redetectLocation() {
+    this.locationName = 'Detecting...';
+    this.locationService.getCurrentLocation().then(loc => this.updateLocationState(loc));
+  }
+
+  async applyManualLocation() {
+    if (!this.manualLocationInput.trim()) return;
+    this.editingLocation = false;
+    this.showSuggestions = false;
+    this.locationSuggestions = [];
+    this.locationName = 'Locating...';
+    try {
+      const loc = await this.locationService.setManualLocation(this.manualLocationInput);
+      this.updateLocationState(loc);
+    } catch {
+      this.snackBar.open('Location not found', 'Close', { duration: 3000 });
+      this.locationName = this.manualLocationInput; // Fallback to what they typed
+      this.loadMatches();
+    }
+  }
+
+  onLocationInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    clearTimeout(this.locationDebounceTimer);
+    if (!value || value.trim().length < 3) {
+      this.locationSuggestions = [];
+      this.showSuggestions = false;
+      return;
+    }
+    this.locationDebounceTimer = setTimeout(async () => {
+      try {
+        this.locationSuggestions = await this.locationService.getSuggestions(value);
+        this.showSuggestions = this.locationSuggestions.length > 0;
+      } catch {
+        this.locationSuggestions = [];
+        this.showSuggestions = false;
+      }
+    }, 300);
+  }
+
+  selectSuggestion(loc: any) {
+    this.manualLocationInput = loc.locationName;
+    this.showSuggestions = false;
+    this.locationSuggestions = [];
+    this.editingLocation = false;
+    this.updateLocationState(loc);
   }
 
   filteredMatches(): Match[] {

@@ -111,7 +111,7 @@ import { Subject, takeUntil } from 'rxjs';
 
     .fab-btn {
       position: fixed;
-      bottom: calc(var(--bottom-nav-height) + var(--spacing-md));
+      bottom: 70px;
       right: var(--spacing-md);
       z-index: 99;
       background: linear-gradient(135deg, #FF6B35 0%, #F59E0B 100%) !important;

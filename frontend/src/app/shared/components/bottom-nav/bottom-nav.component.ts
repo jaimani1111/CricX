@@ -220,6 +220,7 @@ import { EsportsService } from '../../../core/services/esports.service';
     }
 
     .brand, .nav-footer, .admin-links, .section-label { display: none; }
+    .mode-switch-container { display: none; }
     .items-wrapper {
       display: flex;
       width: 100%;
@@ -258,6 +259,33 @@ import { EsportsService } from '../../../core/services/esports.service';
       transition: transform 0.25s ease;
     }
     .nav-item.active .active-indicator { transform: translateX(-50%) scaleX(1); }
+
+
+    .mode-switch {
+      display: flex;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 2px;
+      position: relative;
+      cursor: pointer;
+      width: 80px;
+      height: 28px;
+    }
+    .mode-slider {
+      position: absolute;
+      top: 2px; left: 2px; bottom: 2px;
+      width: calc(50% - 2px);
+      background: var(--gradient-primary);
+      border-radius: 20px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mode-slider.esports-active { transform: translateX(100%); }
+    .mode-label {
+      flex: 1; text-align: center; font-size: 9px; font-weight: 700;
+      color: rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; z-index: 2;
+    }
+    .mode-label.active { color: #0F172A !important; }
 
     /* DESKTOP: Sidebar */
     @media (min-width: 1024px) {
@@ -331,51 +359,20 @@ import { EsportsService } from '../../../core/services/esports.service';
       .logout-btn:hover { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.15); }
       .logout-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
-      /* SIDEBAR MODE SWITCHER STYLE */
+      /* SIDEBAR MODE SWITCHER STYLE (Desktop override) */
       .mode-switch-container {
-        display: flex;
-        width: 100%;
-        padding: 0 16px;
-        margin-bottom: 24px;
-        justify-content: center;
+        display: flex !important;
+        width: 100%; padding: 0 16px; margin-bottom: 24px; justify-content: center;
       }
       .mode-switch {
-        display: flex;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 30px;
-        padding: 4px;
-        position: relative;
-        cursor: pointer;
-        width: 100%;
-        user-select: none;
+        width: 100%; height: auto; border-radius: 30px; padding: 4px;
       }
       .mode-slider {
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        bottom: 4px;
-        width: calc(50% - 4px);
-        background: var(--gradient-primary);
-        border-radius: 25px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: var(--shadow-glow);
-      }
-      .mode-slider.esports-active {
-        transform: translateX(100%);
+        top: 4px; left: 4px; bottom: 4px; width: calc(50% - 4px);
+        border-radius: 25px; box-shadow: var(--shadow-glow);
       }
       .mode-label {
-        flex: 1;
-        text-align: center;
-        font-size: 13px;
-        font-weight: 700;
-        color: rgba(255,255,255,0.4);
-        padding: 6px 0;
-        z-index: 2;
-        transition: color 0.3s;
-      }
-      .mode-label.active {
-        color: #0F172A !important;
+        font-size: 13px; padding: 6px 0;
       }
 
       /* Cyber cyberpunk active item background override */

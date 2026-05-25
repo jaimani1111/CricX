@@ -30,6 +30,7 @@ public class ChallengeService {
                 .locationName(request.getLocationName())
                 .location(new GeoJsonPoint(request.getLongitude(), request.getLatitude()))
                 .dateTime(Instant.parse(request.getDateTime()))
+                .endTime(Instant.parse(request.getDateTime()).plusSeconds(3600 * 3)) // default 3 hrs
                 .format(parseFormat(request.getFormat()))
                 .description(request.getDescription())
                 .build();
@@ -45,6 +46,7 @@ public class ChallengeService {
         List<Challenge> challenges = challengeRepository.findNearbyOpenChallenges(lng, lat, radiusMeters);
 
         return challenges.stream()
+                .filter(c -> c.getEndTime() == null || c.getEndTime().isAfter(Instant.now()))
                 .map(c -> {
                     double dist = calculateDistance(lat, lng,
                             c.getLocation().getY(), c.getLocation().getX());

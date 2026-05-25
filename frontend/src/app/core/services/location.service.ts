@@ -57,6 +57,51 @@ export class LocationService {
     });
   }
 
+  async setManualLocation(locationName: string): Promise<UserLocation> {
+    this._loading.set(true);
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}&limit=1`;
+      const res: any = await this.http.get(url, { headers: { 'Accept-Language': 'en' } }).toPromise();
+      if (res && res.length > 0) {
+        const loc: UserLocation = {
+          latitude: parseFloat(res[0].lat),
+          longitude: parseFloat(res[0].lon),
+          locationName: res[0].display_name.split(',')[0] // Use first part of display name
+        };
+        this._location.set(loc);
+        this._loading.set(false);
+        return loc;
+      }
+      throw new Error('Location not found');
+    } catch (e) {
+      this._loading.set(false);
+      throw e;
+    }
+  }
+
+  async getSuggestions(query: string): Promise<UserLocation[]> {
+    if (!query || query.trim().length < 3) return [];
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+      const res: any = await this.http.get(url, { headers: { 'Accept-Language': 'en' } }).toPromise();
+      if (res && res.length > 0) {
+        return res.map((item: any) => {
+          const parts = item.display_name.split(',');
+          const name = parts.slice(0, 2).map((p: any) => p.trim()).join(', ');
+          return {
+            latitude: parseFloat(item.lat),
+            longitude: parseFloat(item.lon),
+            locationName: name
+          };
+        });
+      }
+      return [];
+    } catch (e) {
+      console.warn('Failed to fetch location suggestions:', e);
+      return [];
+    }
+  }
+
   private async reverseGeocode(lat: number, lng: number): Promise<string> {
     try {
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`;

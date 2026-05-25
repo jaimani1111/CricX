@@ -58,26 +58,7 @@ import { AuthService } from '../../../core/auth/auth.service';
             <mat-error *ngIf="signupForm.get('password')?.hasError('required')">Password is required</mat-error>
           </mat-form-field>
 
-          <div class="selection-grid">
-            <mat-form-field appearance="outline" class="premium-field">
-              <mat-label>Skill Level</mat-label>
-              <mat-select formControlName="skill">
-                <mat-option value="BEGINNER">Beginner</mat-option>
-                <mat-option value="INTERMEDIATE">Intermediate</mat-option>
-                <mat-option value="ADVANCED">Advanced</mat-option>
-              </mat-select>
-            </mat-form-field>
 
-            <mat-form-field appearance="outline" class="premium-field">
-              <mat-label>Preferred Role</mat-label>
-              <mat-select formControlName="preferredRole">
-                <mat-option value="BATSMAN">Batsman</mat-option>
-                <mat-option value="BOWLER">Bowler</mat-option>
-                <mat-option value="ALL_ROUNDER">All Rounder</mat-option>
-                <mat-option value="WICKET_KEEPER">Wicket Keeper</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
 
           <button mat-flat-button class="submit-action-btn" type="submit" [disabled]="signupForm.invalid || isLoading">
             <span *ngIf="!isLoading">Create Account</span>
@@ -127,11 +108,6 @@ import { AuthService } from '../../../core/auth/auth.service';
       border-radius: 14px !important;
     }
 
-    .selection-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
 
     .auth-footer { text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 14px; }
     .auth-footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
@@ -193,8 +169,6 @@ export class SignupComponent {
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      skill: ['INTERMEDIATE'],
-      preferredRole: ['ALL_ROUNDER'],
       isPartner: [false]
     });
   }

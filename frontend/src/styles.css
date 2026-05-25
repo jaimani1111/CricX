@@ -59,6 +59,8 @@
   --border-radius-sm: 12px;
   
   --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-ios: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* ========== RESET & BASE ========== */
@@ -73,6 +75,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 body {
@@ -84,6 +88,8 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -291,8 +297,15 @@ body {
   50% { box-shadow: 0 0 20px rgba(0, 200, 83, 0.4); }
 }
 
+@keyframes springBounce {
+  0%   { transform: scale(0.97); }
+  40%  { transform: scale(1.015); }
+  70%  { transform: scale(0.995); }
+  100% { transform: scale(1); }
+}
+
 .animate-fade-in-up {
-  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   will-change: transform, opacity;
 }
 
@@ -327,6 +340,7 @@ body {
   }
   .page-container {
     padding: var(--spacing-sm);
+    padding-bottom: calc(var(--bottom-nav-height) + var(--spacing-xl));
   }
 }
 
@@ -376,14 +390,57 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
 }
 
-/* Button press micro-animation */
-button:active:not(:disabled) {
-  transform: scale(0.97);
+/* iOS Springy tactile active press effects on all primary interactive elements */
+.menu-item,
+.glass-card,
+.nav-item,
+.sport-chip,
+.pill,
+.chip-item,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.logout-btn,
+.cta-reg-btn,
+button:not(:disabled),
+a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.menu-item:active,
+.glass-card:active,
+.nav-item:active,
+.sport-chip:active,
+.pill:active,
+.chip-item:active,
+.mat-mdc-raised-button:active,
+.mat-mdc-flat-button:active,
+.logout-btn:active,
+.cta-reg-btn:active,
+button:active:not(:disabled),
+a:active {
+  transform: scale(0.96) !important;
+  opacity: 0.88 !important;
+  transition: transform 0.06s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* Bounce-back spring recovery on release */
+.menu-item:not(:active),
+.glass-card:not(:active),
+.nav-item:not(:active),
+.sport-chip:not(:active),
+.pill:not(:active),
+.chip-item:not(:active),
+.mat-mdc-raised-button:not(:active),
+.mat-mdc-flat-button:not(:active),
+.logout-btn:not(:active),
+.cta-reg-btn:not(:active) {
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease !important;
 }
 
 /* Smooth link transitions */
 a {
-  transition: color 0.2s ease, opacity 0.2s ease;
+  transition: color 0.2s ease, opacity 0.2s ease, transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Premium select styling */
@@ -394,6 +451,12 @@ select {
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 32px !important;
+}
+
+/* Fix dropdown options being white */
+select option {
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
 }
 
 /* Improved scrollbar on hover */

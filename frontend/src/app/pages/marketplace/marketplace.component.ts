@@ -90,7 +90,7 @@ import { Router } from '@angular/router';
            </div>
 
            <!-- Empty State Search -->
-           <div class="empty-market text-center py-20 w-full" *ngIf="filteredTurfs.length === 0">
+           <div class="empty-market text-center py-20 w-full" *ngIf="filteredTurfs.length === 0 && turfs.length > 0">
              <mat-icon class="text-muted text-6xl">travel_explore</mat-icon>
              <h3 class="mt-4 text-xl">No venues match your filters</h3>
              <p class="text-muted">Try changing the district chip or searching with a different keyword.</p>
@@ -214,6 +214,33 @@ import { Router } from '@angular/router';
     .market-tabs button.active { background: var(--primary); color: #0F172A; border-color: var(--primary); box-shadow: 0 8px 16px rgba(74, 222, 128, 0.2); }
 
     .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 24px; }
+
+    .empty-market {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .empty-market mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: var(--text-muted) !important;
+      margin-bottom: 16px;
+    }
+    .empty-market h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      margin: 8px 0;
+    }
+    .empty-market p {
+      color: var(--text-muted);
+      max-width: 400px;
+      margin: 0 auto;
+    }
 
     /* FILTER BAR */
     .filter-bar { display: flex; flex-direction: column; gap: 16px; }

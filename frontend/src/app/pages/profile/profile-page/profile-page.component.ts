@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { Router } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../../core/auth/auth.service';
 import { User } from '../../../core/models/user.model';
@@ -11,7 +15,7 @@ import { PlayerService } from '../../../core/services/player.service';
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule, MatSelectModule, MatFormFieldModule, MatSnackBarModule],
   template: `
     <div class="page-container luxury-bg min-h-screen" *ngIf="user">
       <!-- Premium Hero Header -->
@@ -248,7 +252,8 @@ import { PlayerService } from '../../../core/services/player.service';
       margin-bottom: 20px;
     }
 
-    .admin-section { margin-bottom: 40px; }
+    .admin-section, .player-section { margin-bottom: 40px; }
+
     .player-section { margin-bottom: 40px; }
 
     .glass-card {
@@ -301,11 +306,30 @@ export class ProfilePageComponent implements OnInit {
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
     this.user = this.authService.currentUser() as unknown as User;
+    if (this.user && !this.user.skill) this.user.skill = 'INTERMEDIATE';
+  }
+
+  savePreferences() {
+    if (!this.user) return;
+    this.playerService.updateProfile({ 
+      skill: this.user.skill, 
+      preferredRole: this.user.preferredRole 
+    }).subscribe({
+      next: () => {
+        this.authService.updateStoredUser({ 
+          skill: this.user!.skill, 
+          preferredRole: this.user!.preferredRole 
+        });
+        this.snackBar.open('Preferences saved', 'Close', { duration: 2000 });
+      },
+      error: () => this.snackBar.open('Failed to save', 'Close', { duration: 2000 })
+    });
   }
 
   onFileSelected(event: any) {

@@ -17,11 +17,13 @@ import { AuthService } from '../../../../app/core/auth/auth.service';
           <h1>Esports Arena</h1>
           <p class="subtitle">Join and host multiplayer esports lobbies and connect with gamers around the globe.</p>
         </div>
-        <button class="action-btn host-btn" (click)="showHostModal.set(true)">
-          <mat-icon>add</mat-icon>
-          <span>Host Lobbies</span>
-        </button>
       </div>
+
+      <!-- Fixed FAB Host Lobby Button -->
+      <button class="fab-host-lobby" (click)="showHostModal.set(true)">
+        <mat-icon>add</mat-icon>
+        <span>Host Lobby</span>
+      </button>
 
       <!-- Disclaimer banner -->
       <div class="disclaimer-banner">
@@ -232,23 +234,34 @@ import { AuthService } from '../../../../app/core/auth/auth.service';
       font-size: 15px;
     }
 
-    .action-btn {
+    /* Fixed FAB Host Lobby button - matches +Host pattern */
+    .fab-host-lobby {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 999;
       display: flex;
       align-items: center;
       gap: 8px;
       background: var(--gradient-primary);
       border: none;
       color: #0F172A;
-      font-weight: 700;
-      padding: 12px 24px;
-      border-radius: 12px;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 14px 22px;
+      border-radius: 16px;
       cursor: pointer;
-      box-shadow: var(--shadow-glow);
-      transition: var(--transition-base);
+      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 25px rgba(6, 182, 212, 0.4);
+    .fab-host-lobby mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+    .fab-host-lobby:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(6, 182, 212, 0.4);
     }
 
     /* Disclaimer styling */
@@ -516,15 +529,22 @@ import { AuthService } from '../../../../app/core/auth/auth.service';
       justify-content: center;
       z-index: 2000;
       backdrop-filter: blur(12px);
-      padding: 16px;
+      padding: 24px;
+      overflow-y: auto;
     }
     .modal-content {
       width: 100%;
       max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
       padding: 32px;
       background: rgba(15, 23, 42, 0.95);
       border-color: rgba(6, 182, 212, 0.2);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(6, 182, 212, 0.3) transparent;
     }
+    .modal-content::-webkit-scrollbar { width: 4px; }
+    .modal-content::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.3); border-radius: 2px; }
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -602,6 +622,103 @@ import { AuthService } from '../../../../app/core/auth/auth.service';
       padding: 10px 24px;
       border-radius: 10px;
       cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .esports-arena-page {
+        padding: 16px;
+        padding-bottom: 140px;
+      }
+      .esports-arena-page .header-section {
+        padding: 20px !important;
+        text-align: left !important;
+      }
+      .esports-arena-page .title-area h1 {
+        font-size: 22px !important;
+      }
+      .esports-arena-page .subtitle {
+        font-size: 13px;
+      }
+
+      /* Floating round Host FAB on mobile */
+      .fab-host-lobby {
+        bottom: 90px !important;
+        right: 20px !important;
+        border-radius: 50% !important;
+        width: 56px !important;
+        height: 56px !important;
+        min-width: 56px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+      }
+      .fab-host-lobby span {
+        display: none !important;
+      }
+      .fab-host-lobby mat-icon {
+        margin: 0 !important;
+        font-size: 28px !important;
+        width: 28px !important;
+        height: 28px !important;
+      }
+
+      /* Filters row stacks vertically on mobile */
+      .filters-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .filter-controls {
+        width: 100%;
+      }
+      .filter-controls select {
+        flex: 1;
+      }
+
+      /* Match grid single column on mobile */
+      .matches-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      /* Modal goes full-screen on mobile for proper alignment */
+      .modal-backdrop {
+        padding: 0 !important;
+        align-items: stretch !important;
+      }
+      .modal-content {
+        max-width: 100% !important;
+        max-height: 100vh !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 20px !important;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-header {
+        flex-shrink: 0;
+      }
+      .modal-header h2 {
+        font-size: 20px !important;
+      }
+      .modal-form {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 16px;
+      }
+      /* Single column form on mobile */
+      .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 16px !important;
+      }
+      .modal-footer {
+        flex-shrink: 0;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
     }
   `]
 })

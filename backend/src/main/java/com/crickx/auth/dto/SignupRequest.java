@@ -23,8 +23,6 @@ public class SignupRequest {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    private String skill;        // BEGINNER, INTERMEDIATE, ADVANCED
-    private String preferredRole; // BATSMAN, BOWLER, ALL_ROUNDER, WICKET_KEEPER
     private String phone;
 
     @JsonProperty("isPartner")
