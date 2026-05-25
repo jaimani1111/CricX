@@ -139,7 +139,13 @@ public class MatchService {
         }
 
         return matches.stream()
-                .filter(m -> m.getEndTime() == null || m.getEndTime().isAfter(Instant.now()))
+                .filter(m -> {
+                    Instant end = m.getEndTime();
+                    if (end == null && m.getDateTime() != null) {
+                        end = m.getDateTime().plusSeconds(3600 * 2);
+                    }
+                    return end != null && end.isAfter(Instant.now());
+                })
                 .filter(m -> maxCost == null || m.getCostPerPlayer() <= maxCost)
                 .map(m -> {
                     double dist = calculateDistance(lat, lng,
